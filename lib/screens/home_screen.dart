@@ -60,20 +60,30 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Color(0xFF2E80FF),
         body: Center(
           child: OutlinedButton(
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.white),
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                )),
             onPressed: () async {
               bool isJoined = await joinRoom();
               if (isJoined) {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => ListenableProvider.value(
-                        value: _dataStore,
-                        child: const MeetingScreen())));
+                        value: _dataStore, child: const MeetingScreen())));
               } else {
                 const SnackBar(content: Text("Error"));
               }
             },
-            child: const Text('Join meeting and start HLS Streaming'),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 80),
+              child: Text('Go Live!'),
+            ),
           ),
         ),
       ),
