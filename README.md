@@ -7,4 +7,4 @@ An example app on how to integrate 100ms into our Flutter project to build a sim
 
 ## Getting Started
 
-Read the complete guide here: 
+Read the complete guide here: https://www.100ms.live/blog/flutter-live-stream
