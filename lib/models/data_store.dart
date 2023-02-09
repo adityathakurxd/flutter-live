@@ -10,6 +10,7 @@ class UserDataStore extends ChangeNotifier implements HMSUpdateListener {
   HMSVideoTrack? localTrack;
   bool _disposed = false;
   late HMSPeer localPeer;
+  String? streamURL;
 
   @override
   void dispose() {
@@ -83,7 +84,11 @@ class UserDataStore extends ChangeNotifier implements HMSUpdateListener {
   void onRoleChangeRequest({required HMSRoleChangeRequest roleChangeRequest}) {}
 
   @override
-  void onRoomUpdate({required HMSRoom room, required HMSRoomUpdate update}) {}
+  void onRoomUpdate({required HMSRoom room, required HMSRoomUpdate update}) {
+    bool isHLSRunning = room.hmshlsStreamingState?.running ?? false;
+    String? hlsm3u8Url = room.hmshlsStreamingState?.variants[0]?.hlsStreamUrl;
+    streamURL = hlsm3u8Url;
+  }
 
   @override
   void onTrackUpdate(

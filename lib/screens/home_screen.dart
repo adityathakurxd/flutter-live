@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutterlive/screens/view_live.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../models/data_store.dart';
 import '../services/join_service.dart';
 import '../services/sdk_initializer.dart';
 import 'live_screen.dart';
+import 'video_player.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -62,28 +64,57 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         backgroundColor: Color(0xFF2E80FF),
         body: Center(
-          child: OutlinedButton(
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.white),
-                shape: MaterialStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                )),
-            onPressed: () async {
-              bool isJoined = await joinRoom();
-              if (isJoined) {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => ListenableProvider.value(
-                        value: _dataStore, child: const MeetingScreen())));
-              } else {
-                const SnackBar(content: Text("Error"));
-              }
-            },
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 80),
-              child: Text('Go Live!'),
-            ),
+          child: Column(
+            children: [
+              OutlinedButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                    )),
+                onPressed: () async {
+                  bool isJoined = await joinRoom();
+                  if (isJoined) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => ListenableProvider.value(
+                            value: _dataStore, child: const MeetingScreen())));
+                  } else {
+                    const SnackBar(content: Text("Error"));
+                  }
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 80),
+                  child: Text('Go Live!'),
+                ),
+              ),
+              OutlinedButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                    )),
+                onPressed: () async {
+                  bool isJoined = await joinRoom();
+                  if (isJoined) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => ListenableProvider.value(
+                              value: _dataStore,
+                              child: StreamViewScreen(),
+                            )));
+                  } else {
+                    const SnackBar(content: Text("Error"));
+                  }
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 80),
+                  child: Text('Join Live!'),
+                ),
+              ),
+            ],
           ),
         ),
       ),

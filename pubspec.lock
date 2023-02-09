@@ -92,10 +92,10 @@ packages:
     dependency: "direct main"
     description:
       name: hmssdk_flutter
-      sha256: "801f7a8dde65f4a04c85f4d86086aa6206a4bfa958fad081d30caf8e0eb858f7"
+      sha256: "8efca6fc1e7eb03655889e2ac3b103b5cfb92e49a28be9d7d49fba02d642549b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.8"
+    version: "1.3.0"
   html:
     dependency: transitive
     description:
