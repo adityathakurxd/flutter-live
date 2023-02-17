@@ -3,7 +3,8 @@ import 'package:hmssdk_flutter/hmssdk_flutter.dart';
 
 import '../services/sdk_initializer.dart';
 
-class UserDataStore extends ChangeNotifier implements HMSUpdateListener {
+class UserDataStore extends ChangeNotifier
+    implements HMSUpdateListener, HMSActionResultListener {
   HMSTrack? remoteVideoTrack;
   HMSPeer? remotePeer;
   HMSTrack? remoteAudioTrack;
@@ -39,7 +40,7 @@ class UserDataStore extends ChangeNotifier implements HMSUpdateListener {
         break;
       }
     }
-    SdkInitializer.hmssdk.startHlsStreaming();
+    SdkInitializer.hmssdk.startHlsStreaming(hmsActionResultListener: this);
   }
 
   @override
@@ -169,5 +170,28 @@ class UserDataStore extends ChangeNotifier implements HMSUpdateListener {
   @override
   void onHMSError({required HMSException error}) {
     // TODO: implement onHMSError
+  }
+
+  @override
+  void onException(
+      {required HMSActionResultListenerMethod methodType,
+      Map<String, dynamic>? arguments,
+      required HMSException hmsException}) {
+    // TODO: implement onException
+  }
+
+  @override
+  void onSuccess(
+      {required HMSActionResultListenerMethod methodType,
+      Map<String, dynamic>? arguments}) {
+    switch (methodType) {
+      case HMSActionResultListenerMethod.hlsStreamingStarted:
+        //HLS Started successfully - maintain a variable
+        break;
+
+      case HMSActionResultListenerMethod.hlsStreamingStopped:
+        //HLS Stopped successfully - logs
+        break;
+    }
   }
 }
