@@ -75,9 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     )),
                 onPressed: () async {
-                  print("TRYING TO JOIN");
                   bool isJoined = await joinRoom();
-                  print("$isJoined");
                   if (isJoined) {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => ListenableProvider.value(
