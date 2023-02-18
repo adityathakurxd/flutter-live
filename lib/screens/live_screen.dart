@@ -26,7 +26,9 @@ class _LiveScreenState extends State<LiveScreen> {
     return WillPopScope(
       onWillPop: () async {
         context.read<UserDataStore>().leaveRoom();
-        Navigator.pop(context);
+        if (context.read<UserDataStore>().isLive == false) {
+          Navigator.pop(context);
+        }
         return true;
       },
       child: SafeArea(

@@ -1,8 +1,15 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutterlive/screens/home_screen.dart';
+import 'package:provider/provider.dart';
+
+import 'models/data_store.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => UserDataStore()),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

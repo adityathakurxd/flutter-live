@@ -15,6 +15,7 @@ class UserDataStore extends ChangeNotifier
   late HMSPeer localPeer;
   String? streamURL;
   bool isRoomEnded = false;
+  bool isLive = false;
 
   @override
   void dispose() {
@@ -36,6 +37,7 @@ class UserDataStore extends ChangeNotifier
   void onError({required HMSException error}) {}
 
   void leaveRoom() async {
+    SdkInitializer.hmssdk.stopHlsStreaming();
     SdkInitializer.hmssdk.leave(hmsActionResultListener: this);
   }
 
@@ -187,14 +189,14 @@ class UserDataStore extends ChangeNotifier
     // TODO: implement onException
     switch (methodType) {
       case HMSActionResultListenerMethod.leave:
-        log("Leave room error ${hmsException.message}");
+        print("Leave room error ${hmsException.message}");
         break;
       case HMSActionResultListenerMethod.hlsStreamingStarted:
-        log("HLS Stream start error ${hmsException.message}");
+        print("HLS Stream start error ${hmsException.message}");
         break;
 
       case HMSActionResultListenerMethod.hlsStreamingStopped:
-        log("HLS Stream stop error ${hmsException.message}");
+        print("HLS Stream stop error ${hmsException.message}");
         break;
     }
   }
@@ -205,11 +207,11 @@ class UserDataStore extends ChangeNotifier
       Map<String, dynamic>? arguments}) {
     switch (methodType) {
       case HMSActionResultListenerMethod.hlsStreamingStarted:
-        //HLS Started successfully - maintain a variable
+        isLive = true;
         break;
 
       case HMSActionResultListenerMethod.hlsStreamingStopped:
-        //HLS Stopped successfully - logs
+        isLive = false;
         break;
 
       case HMSActionResultListenerMethod.leave:
