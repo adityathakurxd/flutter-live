@@ -53,9 +53,9 @@ class _LiveScreenState extends State<LiveScreen> {
                               size: 30,
                             ),
                           )
-                        : (localTrack != null)
+                        : (remoteTrack != null)
                             ? HMSVideoView(
-                                track: localTrack, matchParent: false)
+                                track: remoteTrack as HMSVideoTrack, matchParent: false)
                             : const Center(child: Text("No Video"))),
                 Align(
                   alignment: Alignment.bottomCenter,
