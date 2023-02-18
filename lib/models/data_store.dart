@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:hmssdk_flutter/hmssdk_flutter.dart';
 
@@ -12,6 +14,7 @@ class UserDataStore extends ChangeNotifier
   bool _disposed = false;
   late HMSPeer localPeer;
   String? streamURL;
+  bool isRoomEnded = false;
 
   @override
   void dispose() {
@@ -31,6 +34,10 @@ class UserDataStore extends ChangeNotifier
       {required HMSTrackChangeRequest hmsTrackChangeRequest}) {}
 
   void onError({required HMSException error}) {}
+
+  void leaveRoom() async {
+    SdkInitializer.hmssdk.leave(hmsActionResultListener: this);
+  }
 
   @override
   void onJoin({required HMSRoom room}) {
@@ -178,6 +185,18 @@ class UserDataStore extends ChangeNotifier
       Map<String, dynamic>? arguments,
       required HMSException hmsException}) {
     // TODO: implement onException
+    switch (methodType) {
+      case HMSActionResultListenerMethod.leave:
+        log("Leave room error ${hmsException.message}");
+        break;
+      case HMSActionResultListenerMethod.hlsStreamingStarted:
+        log("HLS Stream start error ${hmsException.message}");
+        break;
+
+      case HMSActionResultListenerMethod.hlsStreamingStopped:
+        log("HLS Stream stop error ${hmsException.message}");
+        break;
+    }
   }
 
   @override
@@ -192,6 +211,10 @@ class UserDataStore extends ChangeNotifier
       case HMSActionResultListenerMethod.hlsStreamingStopped:
         //HLS Stopped successfully - logs
         break;
+
+      case HMSActionResultListenerMethod.leave:
+        isRoomEnded = true;
+        notifyListeners();
     }
   }
 }

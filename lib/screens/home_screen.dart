@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (isJoined) {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => ListenableProvider.value(
-                            value: _dataStore, child: const MeetingScreen())));
+                            value: _dataStore, child: const LiveScreen())));
                   } else {
                     const SnackBar(content: Text("Error"));
                   }

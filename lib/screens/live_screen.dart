@@ -4,24 +4,17 @@ import 'package:provider/provider.dart';
 import '../models/data_store.dart';
 import '../services/sdk_initializer.dart';
 
-class MeetingScreen extends StatefulWidget {
-  const MeetingScreen({Key? key}) : super(key: key);
+class LiveScreen extends StatefulWidget {
+  const LiveScreen({Key? key}) : super(key: key);
 
   @override
-  _MeetingScreenState createState() => _MeetingScreenState();
+  _LiveScreenState createState() => _LiveScreenState();
 }
 
-class _MeetingScreenState extends State<MeetingScreen> {
+class _LiveScreenState extends State<LiveScreen> {
   bool isLocalAudioOn = true;
   bool isLocalVideoOn = true;
   Offset position = const Offset(10, 10);
-
-  Future<bool> leaveRoom() async {
-    SdkInitializer.hmssdk.stopHlsStreaming();
-    SdkInitializer.hmssdk.leave();
-    Navigator.pop(context);
-    return false;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +25,9 @@ class _MeetingScreenState extends State<MeetingScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        return leaveRoom();
+        context.read<UserDataStore>().leaveRoom();
+        Navigator.pop(context);
+        return true;
       },
       child: SafeArea(
         child: Scaffold(
@@ -66,7 +61,8 @@ class _MeetingScreenState extends State<MeetingScreen> {
                       children: [
                         GestureDetector(
                           onTap: () async {
-                            leaveRoom();
+                            context.read<UserDataStore>().leaveRoom();
+                            Navigator.pop(context);
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -128,7 +124,8 @@ class _MeetingScreenState extends State<MeetingScreen> {
                   left: 10,
                   child: GestureDetector(
                     onTap: () {
-                      leaveRoom();
+                      context.read<UserDataStore>().leaveRoom();
+                      Navigator.pop(context);
                     },
                     child: const Icon(
                       Icons.arrow_back,
