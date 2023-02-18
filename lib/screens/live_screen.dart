@@ -4,35 +4,36 @@ import 'package:provider/provider.dart';
 import '../models/data_store.dart';
 import '../services/sdk_initializer.dart';
 
-class MeetingScreen extends StatefulWidget {
-  const MeetingScreen({Key? key}) : super(key: key);
+class LiveScreen extends StatefulWidget {
+  const LiveScreen({Key? key}) : super(key: key);
 
   @override
-  _MeetingScreenState createState() => _MeetingScreenState();
+  _LiveScreenState createState() => _LiveScreenState();
 }
 
-class _MeetingScreenState extends State<MeetingScreen> {
+class _LiveScreenState extends State<LiveScreen> {
   bool isLocalAudioOn = true;
   bool isLocalVideoOn = true;
   Offset position = const Offset(10, 10);
-
-  Future<bool> leaveRoom() async {
-    SdkInitializer.hmssdk.stopHlsStreaming();
-    SdkInitializer.hmssdk.leave();
-    Navigator.pop(context);
-    return false;
-  }
 
   @override
   Widget build(BuildContext context) {
     final _isVideoOff = context.select<UserDataStore, bool>(
         (user) => user.remoteVideoTrack?.isMute ?? true);
+    final _peer =
+        context.select<UserDataStore, HMSPeer?>((user) => user.remotePeer);
     final remoteTrack = context
         .select<UserDataStore, HMSTrack?>((user) => user.remoteVideoTrack);
+    final localTrack = context
+        .select<UserDataStore, HMSVideoTrack?>((user) => user.localTrack);
 
     return WillPopScope(
       onWillPop: () async {
-        return leaveRoom();
+        context.read<UserDataStore>().leaveRoom();
+        if (context.read<UserDataStore>().isLive == false) {
+          Navigator.pop(context);
+        }
+        return true;
       },
       child: SafeArea(
         child: Scaffold(
@@ -52,10 +53,9 @@ class _MeetingScreenState extends State<MeetingScreen> {
                               size: 30,
                             ),
                           )
-                        : (remoteTrack != null)
+                        : (localTrack != null)
                             ? HMSVideoView(
-                                track: remoteTrack as HMSVideoTrack,
-                                matchParent: false)
+                                track: localTrack, matchParent: false)
                             : const Center(child: Text("No Video"))),
                 Align(
                   alignment: Alignment.bottomCenter,
@@ -66,7 +66,8 @@ class _MeetingScreenState extends State<MeetingScreen> {
                       children: [
                         GestureDetector(
                           onTap: () async {
-                            leaveRoom();
+                            context.read<UserDataStore>().leaveRoom();
+                            Navigator.pop(context);
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -88,6 +89,9 @@ class _MeetingScreenState extends State<MeetingScreen> {
                         GestureDetector(
                           onTap: () => {
                             SdkInitializer.hmssdk.toggleCameraMuteState(),
+                            setState(() {
+                              isLocalVideoOn = !isLocalVideoOn;
+                            })
                           },
                           child: CircleAvatar(
                             radius: 25,
@@ -103,8 +107,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
                         ),
                         GestureDetector(
                           onTap: () => {
-                            SdkInitializer.hmssdk
-                                .switchAudio(isOn: isLocalAudioOn),
+                            SdkInitializer.hmssdk.toggleMicMuteState(),
                             setState(() {
                               isLocalAudioOn = !isLocalAudioOn;
                             })
@@ -128,7 +131,8 @@ class _MeetingScreenState extends State<MeetingScreen> {
                   left: 10,
                   child: GestureDetector(
                     onTap: () {
-                      leaveRoom();
+                      context.read<UserDataStore>().leaveRoom();
+                      Navigator.pop(context);
                     },
                     child: const Icon(
                       Icons.arrow_back,

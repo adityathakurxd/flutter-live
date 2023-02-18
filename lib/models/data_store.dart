@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:hmssdk_flutter/hmssdk_flutter.dart';
 
 import '../services/sdk_initializer.dart';
 
-class UserDataStore extends ChangeNotifier implements HMSUpdateListener {
+class UserDataStore extends ChangeNotifier
+    implements HMSUpdateListener, HMSActionResultListener {
   HMSTrack? remoteVideoTrack;
   HMSPeer? remotePeer;
   HMSTrack? remoteAudioTrack;
@@ -11,6 +14,8 @@ class UserDataStore extends ChangeNotifier implements HMSUpdateListener {
   bool _disposed = false;
   late HMSPeer localPeer;
   String? streamURL;
+  bool isRoomEnded = false;
+  bool isLive = false;
 
   @override
   void dispose() {
@@ -31,6 +36,11 @@ class UserDataStore extends ChangeNotifier implements HMSUpdateListener {
 
   void onError({required HMSException error}) {}
 
+  void leaveRoom() async {
+    SdkInitializer.hmssdk.stopHlsStreaming();
+    SdkInitializer.hmssdk.leave(hmsActionResultListener: this);
+  }
+
   @override
   void onJoin({required HMSRoom room}) {
     for (HMSPeer each in room.peers!) {
@@ -39,7 +49,7 @@ class UserDataStore extends ChangeNotifier implements HMSUpdateListener {
         break;
       }
     }
-    SdkInitializer.hmssdk.startHlsStreaming();
+    SdkInitializer.hmssdk.startHlsStreaming(hmsActionResultListener: this);
   }
 
   @override
@@ -169,5 +179,177 @@ class UserDataStore extends ChangeNotifier implements HMSUpdateListener {
   @override
   void onHMSError({required HMSException error}) {
     // TODO: implement onHMSError
+  }
+
+  @override
+  void onException(
+      {required HMSActionResultListenerMethod methodType,
+      Map<String, dynamic>? arguments,
+      required HMSException hmsException}) {
+    // TODO: implement onException
+    switch (methodType) {
+      case HMSActionResultListenerMethod.leave:
+        print("Leave room error ${hmsException.message}");
+        break;
+      case HMSActionResultListenerMethod.hlsStreamingStarted:
+        print("HLS Stream start error ${hmsException.message}");
+        break;
+
+      case HMSActionResultListenerMethod.hlsStreamingStopped:
+        print("HLS Stream stop error ${hmsException.message}");
+        break;
+      case HMSActionResultListenerMethod.changeTrackState:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeMetadata:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.endRoom:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.removePeer:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.acceptChangeRole:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeRole:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeRoleOfPeer:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeTrackStateForRole:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.startRtmpOrRecording:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.stopRtmpAndRecording:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeName:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.sendBroadcastMessage:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.sendGroupMessage:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.sendDirectMessage:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.startScreenShare:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.stopScreenShare:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.startAudioShare:
+        print("Audio share error ${hmsException.message}");
+        break;
+      case HMSActionResultListenerMethod.stopAudioShare:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.setSessionMetadata:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.switchCamera:
+        print("Switch camera error ${hmsException.message}");
+        break;
+      case HMSActionResultListenerMethod.changeRoleOfPeersWithRoles:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.unknown:
+        // TODO: Handle this case.
+        break;
+    }
+  }
+
+  @override
+  void onSuccess(
+      {required HMSActionResultListenerMethod methodType,
+      Map<String, dynamic>? arguments}) {
+    switch (methodType) {
+      case HMSActionResultListenerMethod.hlsStreamingStarted:
+        isLive = true;
+        break;
+
+      case HMSActionResultListenerMethod.hlsStreamingStopped:
+        isLive = false;
+        break;
+
+      case HMSActionResultListenerMethod.leave:
+        isRoomEnded = true;
+        notifyListeners();
+        break;
+      case HMSActionResultListenerMethod.changeTrackState:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeMetadata:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.endRoom:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.removePeer:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.acceptChangeRole:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeRole:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeRoleOfPeer:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeTrackStateForRole:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.startRtmpOrRecording:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.stopRtmpAndRecording:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeName:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.sendBroadcastMessage:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.sendGroupMessage:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.sendDirectMessage:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.startScreenShare:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.stopScreenShare:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.startAudioShare:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.stopAudioShare:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.setSessionMetadata:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.switchCamera:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.changeRoleOfPeersWithRoles:
+        // TODO: Handle this case.
+        break;
+      case HMSActionResultListenerMethod.unknown:
+        // TODO: Handle this case.
+        break;
+    }
   }
 }

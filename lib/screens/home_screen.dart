@@ -63,10 +63,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Color(0xFF2E80FF),
-        body: Center(
-          child: Column(
-            children: [
-              OutlinedButton(
+        body: Column(
+          children: [
+            Center(
+              child: OutlinedButton(
                 style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.white),
                     shape: MaterialStateProperty.all(
@@ -75,13 +75,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     )),
                 onPressed: () async {
+                  print("TRYING TO JOIN");
                   bool isJoined = await joinRoom();
+                  print("$isJoined");
                   if (isJoined) {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => ListenableProvider.value(
-                            value: _dataStore, child: const MeetingScreen())));
+                            value: _dataStore, child: const LiveScreen())));
                   } else {
-                    const SnackBar(content: Text("Error"));
+                    const snackBar = SnackBar(
+                      content: Text('Error in joining room and streaming.'),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   }
                 },
                 child: const Padding(
@@ -89,33 +94,34 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text('Go Live!'),
                 ),
               ),
-              OutlinedButton(
-                style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.white),
-                    shape: MaterialStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                    )),
-                onPressed: () async {
-                  bool isJoined = await joinRoom();
-                  if (isJoined) {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => ListenableProvider.value(
-                              value: _dataStore,
-                              child: StreamViewScreen(),
-                            )));
-                  } else {
-                    const SnackBar(content: Text("Error"));
-                  }
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 80),
-                  child: Text('Join Live!'),
-                ),
-              ),
-            ],
-          ),
+            ),
+            // OutlinedButton(
+            //   style: ButtonStyle(
+            //       backgroundColor: MaterialStateProperty.all(Colors.white),
+            //       shape: MaterialStateProperty.all(
+            //         RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(40),
+            //         ),
+            //       )),
+            //   onPressed: () async {
+            //     // use onjoin
+            //     bool isJoined = await joinRoom();
+            //     if (isJoined) {
+            //       Navigator.of(context).push(MaterialPageRoute(
+            //           builder: (_) => ListenableProvider.value(
+            //                 value: _dataStore,
+            //                 child: StreamViewScreen(),
+            //               )));
+            //     } else {
+            //       const SnackBar(content: Text("Error"));
+            //     }
+            //   },
+            //   child: const Padding(
+            //     padding: EdgeInsets.symmetric(horizontal: 80),
+            //     child: Text('Join Live!'),
+            //   ),
+            // ),
+          ],
         ),
       ),
     );
