@@ -20,8 +20,12 @@ class _LiveScreenState extends State<LiveScreen> {
   Widget build(BuildContext context) {
     final _isVideoOff = context.select<UserDataStore, bool>(
         (user) => user.remoteVideoTrack?.isMute ?? true);
+    final _peer =
+        context.select<UserDataStore, HMSPeer?>((user) => user.remotePeer);
     final remoteTrack = context
         .select<UserDataStore, HMSTrack?>((user) => user.remoteVideoTrack);
+    final localTrack = context
+        .select<UserDataStore, HMSVideoTrack?>((user) => user.localTrack);
 
     return WillPopScope(
       onWillPop: () async {
@@ -49,10 +53,9 @@ class _LiveScreenState extends State<LiveScreen> {
                               size: 30,
                             ),
                           )
-                        : (remoteTrack != null)
+                        : (localTrack != null)
                             ? HMSVideoView(
-                                track: remoteTrack as HMSVideoTrack,
-                                matchParent: false)
+                                track: localTrack, matchParent: false)
                             : const Center(child: Text("No Video"))),
                 Align(
                   alignment: Alignment.bottomCenter,
@@ -86,6 +89,9 @@ class _LiveScreenState extends State<LiveScreen> {
                         GestureDetector(
                           onTap: () => {
                             SdkInitializer.hmssdk.toggleCameraMuteState(),
+                            setState(() {
+                              isLocalVideoOn = !isLocalVideoOn;
+                            })
                           },
                           child: CircleAvatar(
                             radius: 25,
@@ -101,8 +107,7 @@ class _LiveScreenState extends State<LiveScreen> {
                         ),
                         GestureDetector(
                           onTap: () => {
-                            SdkInitializer.hmssdk
-                                .switchAudio(isOn: isLocalAudioOn),
+                            SdkInitializer.hmssdk.toggleMicMuteState(),
                             setState(() {
                               isLocalAudioOn = !isLocalAudioOn;
                             })
