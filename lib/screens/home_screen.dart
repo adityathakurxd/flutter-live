@@ -39,12 +39,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //Handles room joining functionality
-  Future<bool> joinRoom() async {
+  Future<bool> joinRoom({String role = "broadcaster"}) async {
     setState(() {
       _isLoading = true;
     });
     //The join method initialize sdk,gets auth token,creates HMSConfig and helps in joining the room
-    bool isJoinSuccessful = await JoinService.join(SdkInitializer.hmssdk);
+    bool isJoinSuccessful =
+        await JoinService.join(SdkInitializer.hmssdk, role: role);
     if (!isJoinSuccessful) {
       return false;
     }
@@ -63,35 +64,73 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Color(0xFF2E80FF),
-        body: Center(
-          child: OutlinedButton(
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.white),
-                shape: MaterialStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                )),
-            onPressed: () async {
-              bool isJoined = await joinRoom();
-
-              if (isJoined) {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => ListenableProvider.value(
-                        value: _dataStore, child: const LiveScreen())));
-              } else {
-                const snackBar = SnackBar(
-                  content: Text('Error in joining room and streaming.'),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              }
-            },
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 80),
-              child:
-                  _isLoading ? CircularProgressIndicator() : Text('Go Live!'),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(
+              width: double.infinity,
             ),
-          ),
+            OutlinedButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.white),
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                  )),
+              onPressed: () async {
+                bool isJoined = await joinRoom();
+
+                if (isJoined) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => ListenableProvider.value(
+                          value: _dataStore, child: const LiveScreen())));
+                } else {
+                  const snackBar = SnackBar(
+                    content: Text('Error in joining room and streaming.'),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 80),
+                child:
+                    _isLoading ? CircularProgressIndicator() : Text('Go Live!'),
+              ),
+            ),
+
+            //Viewer
+            OutlinedButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.white),
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                  )),
+              onPressed: () async {
+                bool isJoined = await joinRoom(role: "hls-viewer");
+
+                if (isJoined) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => ListenableProvider.value(
+                          value: _dataStore, child: const StreamViewScreen())));
+                } else {
+                  const snackBar = SnackBar(
+                    content: Text('Error in joining room and viewing.'),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 55),
+                child: _isLoading
+                    ? CircularProgressIndicator()
+                    : Text('View Live Stream'),
+              ),
+            ),
+          ],
         ),
       ),
     );
