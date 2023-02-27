@@ -4,7 +4,9 @@ import 'dart:convert';
 
 class JoinService {
   static Future<bool> join(HMSSDK hmssdk, {String role = "broadcaster"}) async {
+    //TODO: Replace with your Room Id (Watch setup video here: https://www.youtube.com/watch?v=GJ94-BaszpQ&feature=youtu.be)
     String roomId = "632187104208780bf6630f3c";
+    //TODO: Use your own Token endpoint (Watch setup video here: https://www.youtube.com/watch?v=GJ94-BaszpQ&feature=youtu.be)
     Uri endPoint = Uri.parse(
         "https://prod-in2.100ms.live/hmsapi/adityathakur.app.100ms.live/api/token");
     http.Response response = await http.post(endPoint,

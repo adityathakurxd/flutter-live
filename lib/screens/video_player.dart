@@ -61,23 +61,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           }
         },
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     setState(() {
-      //       // If the video is playing, pause it.
-      //       if (_controller.value.isPlaying) {
-      //         _controller.pause();
-      //       } else {
-      //         // If the video is paused, play it.
-      //         _controller.play();
-      //       }
-      //     });
-      //   },
-      //   // Display the correct icon depending on the state of the player.
-      //   child: Icon(
-      //     _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-      //   ),
-      // ),
     );
   }
 }
