@@ -49,7 +49,16 @@ class UserDataStore extends ChangeNotifier
         break;
       }
     }
-    SdkInitializer.hmssdk.startHlsStreaming(hmsActionResultListener: this);
+    if (localPeer.role.name == "broadcaster") {
+      SdkInitializer.hmssdk.startHlsStreaming(hmsActionResultListener: this);
+    }
+
+    isLive = room.hmshlsStreamingState?.running ?? false;
+    if (isLive) {
+      String? hlsm3u8Url = room.hmshlsStreamingState?.variants[0]?.hlsStreamUrl;
+      streamURL = hlsm3u8Url;
+      notifyListeners();
+    }
   }
 
   @override
@@ -96,10 +105,15 @@ class UserDataStore extends ChangeNotifier
   @override
   void onRoomUpdate({required HMSRoom room, required HMSRoomUpdate update}) {
     isLive = room.hmshlsStreamingState?.running ?? false;
-    if (isLive) {
-      String? hlsm3u8Url = room.hmshlsStreamingState?.variants[0]?.hlsStreamUrl;
-      streamURL = hlsm3u8Url;
-      notifyListeners();
+    switch (update) {
+      case HMSRoomUpdate.hlsStreamingStateUpdated:
+        if (isLive) {
+          String? hlsm3u8Url =
+              room.hmshlsStreamingState?.variants[0]?.hlsStreamUrl;
+          streamURL = hlsm3u8Url;
+          notifyListeners();
+        }
+        break;
     }
   }
 

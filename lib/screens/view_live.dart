@@ -41,10 +41,16 @@ class _StreamViewScreenState extends State<StreamViewScreen> {
             child: Stack(
               children: [
                 Container(
-                    color: Colors.black.withOpacity(0.9),
-                    child: (streamURL != null)
-                        ? VideoPlayerScreen(streamURL: streamURL)
-                        : const Center(child: Text("No Video"))),
+                  color: Colors.black.withOpacity(0.9),
+                  child: (streamURL != null)
+                      ? VideoPlayerScreen(streamURL: streamURL)
+                      : const Center(
+                          child: Text(
+                            "No Live Video",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                ),
               ],
             ),
           ),
