@@ -64,13 +64,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Color(0xFF2E80FF),
-        body: Column(
+        body: 
+        _isLoading?
+        const CircularProgressIndicator(strokeWidth: 2,)
+        :
+        Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(
-              width: double.infinity,
-            ),
+            SizedBox(width: MediaQuery.of(context).size.width,),
             OutlinedButton(
               style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all(Colors.white),
@@ -93,10 +94,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 }
               },
-              child: Padding(
+              child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 80),
-                child:
-                    _isLoading ? CircularProgressIndicator() : Text('Go Live!'),
+                child:Text('Go Live!'),
               ),
             ),
 
@@ -110,6 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   )),
               onPressed: () async {
+                //Joining the room as hls-viewer
                 bool isJoined = await joinRoom(role: "hls-viewer");
 
                 if (isJoined) {
@@ -123,11 +124,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 }
               },
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 55),
-                child: _isLoading
-                    ? CircularProgressIndicator()
-                    : Text('View Live Stream'),
+              child: const Padding(
+                padding:  EdgeInsets.symmetric(horizontal: 55),
+                child:  Text('View Live Stream'),
               ),
             ),
           ],

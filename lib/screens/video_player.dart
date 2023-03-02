@@ -49,10 +49,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return Center(
-              child: AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                // aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
+              child: Transform.scale(
+                scaleX: 1.1,
+                scaleY: 1.3,
+                child: AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                ),
               ),
             );
           } else {

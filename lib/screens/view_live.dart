@@ -18,8 +18,7 @@ class _StreamViewScreenState extends State<StreamViewScreen> {
   Offset position = const Offset(10, 10);
 
   Future<bool> leaveRoom() async {
-    SdkInitializer.hmssdk.stopHlsStreaming();
-    SdkInitializer.hmssdk.leave();
+    context.read<UserDataStore>().leaveRoom();
     Navigator.pop(context);
     return false;
   }

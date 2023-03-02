@@ -7,9 +7,8 @@ import '../services/sdk_initializer.dart';
 
 class UserDataStore extends ChangeNotifier
     implements HMSUpdateListener, HMSActionResultListener {
-  HMSTrack? remoteVideoTrack;
-  HMSPeer? remotePeer;
-  HMSTrack? remoteAudioTrack;
+  HMSVideoTrack? remoteVideoTrack;
+  HMSTrack? localAudioTrack;
   HMSVideoTrack? localTrack;
   bool _disposed = false;
   late HMSPeer localPeer;
@@ -37,10 +36,22 @@ class UserDataStore extends ChangeNotifier
   void onError({required HMSException error}) {}
 
   void leaveRoom() async {
-    SdkInitializer.hmssdk.stopHlsStreaming();
+
+    //Checking whether the peer has permission to stop HLS
+    if ((localPeer.role.permissions.hlsStreaming ?? false) && isLive) {
+      SdkInitializer.hmssdk.stopHlsStreaming(hmsActionResultListener: this);
+    }
+
+    //Calling leave method to leave the room
     SdkInitializer.hmssdk.leave(hmsActionResultListener: this);
   }
 
+  void startHLSStreaming(){
+    //Checking whether the peer has permission to stop HLS
+    if (localPeer.role.permissions.hlsStreaming ?? false) {
+      SdkInitializer.hmssdk.startHlsStreaming(hmsActionResultListener: this);
+    }
+  }
   @override
   void onJoin({required HMSRoom room}) {
     for (HMSPeer each in room.peers!) {
@@ -49,16 +60,16 @@ class UserDataStore extends ChangeNotifier
         break;
       }
     }
-    if (localPeer.role.name == "broadcaster") {
-      SdkInitializer.hmssdk.startHlsStreaming(hmsActionResultListener: this);
-    }
 
     isLive = room.hmshlsStreamingState?.running ?? false;
+    if ((localPeer.role.permissions.hlsStreaming??false) && !isLive) {
+      SdkInitializer.hmssdk.startHlsStreaming(hmsActionResultListener: this);
+    }
     if (isLive) {
       String? hlsm3u8Url = room.hmshlsStreamingState?.variants[0]?.hlsStreamUrl;
       streamURL = hlsm3u8Url;
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   @override
@@ -68,12 +79,8 @@ class UserDataStore extends ChangeNotifier
   void onPeerUpdate({required HMSPeer peer, required HMSPeerUpdate update}) {
     switch (update) {
       case HMSPeerUpdate.peerJoined:
-        remotePeer = peer;
-        remoteAudioTrack = peer.audioTrack;
-        remoteVideoTrack = peer.videoTrack;
         break;
       case HMSPeerUpdate.peerLeft:
-        remotePeer = null;
         break;
       case HMSPeerUpdate.roleUpdated:
         break;
@@ -125,45 +132,45 @@ class UserDataStore extends ChangeNotifier
     switch (trackUpdate) {
       case HMSTrackUpdate.trackAdded:
         if (track.kind == HMSTrackKind.kHMSTrackKindAudio) {
-          if (peer.isLocal) remoteAudioTrack = track;
+          if (peer.isLocal) localAudioTrack = track;
         } else if (track.kind == HMSTrackKind.kHMSTrackKindVideo) {
           if (peer.isLocal) {
-            remoteVideoTrack = track;
+            localTrack = track as HMSVideoTrack; 
           } else {
-            localTrack = track as HMSVideoTrack;
+            remoteVideoTrack = track as HMSVideoTrack;
           }
         }
         break;
       case HMSTrackUpdate.trackRemoved:
         if (track.kind == HMSTrackKind.kHMSTrackKindAudio) {
-          if (peer.isLocal) remoteAudioTrack = null;
+          if (peer.isLocal) localAudioTrack = null;
         } else if (track.kind == HMSTrackKind.kHMSTrackKindVideo) {
           if (peer.isLocal) {
-            remoteVideoTrack = null;
-          } else {
             localTrack = null;
+          } else {
+            remoteVideoTrack = null;
           }
         }
         break;
       case HMSTrackUpdate.trackMuted:
         if (track.kind == HMSTrackKind.kHMSTrackKindAudio) {
-          if (peer.isLocal) remoteAudioTrack = track;
+          if (peer.isLocal) localAudioTrack = track;
         } else if (track.kind == HMSTrackKind.kHMSTrackKindVideo) {
           if (peer.isLocal) {
-            remoteVideoTrack = track;
+            localTrack = track as HMSVideoTrack;
           } else {
-            localTrack = null;
+             remoteVideoTrack = track as HMSVideoTrack;
           }
         }
         break;
       case HMSTrackUpdate.trackUnMuted:
         if (track.kind == HMSTrackKind.kHMSTrackKindAudio) {
-          if (peer.isLocal) remoteAudioTrack = track;
+          if (peer.isLocal) localAudioTrack = track;
         } else if (track.kind == HMSTrackKind.kHMSTrackKindVideo) {
           if (peer.isLocal) {
-            remoteVideoTrack = track;
-          } else {
             localTrack = track as HMSVideoTrack;
+          } else {
+            remoteVideoTrack = track as HMSVideoTrack;
           }
         }
         break;
@@ -232,15 +239,18 @@ class UserDataStore extends ChangeNotifier
       case HMSActionResultListenerMethod.hlsStreamingStarted:
         //If start HLS streaming call is successful, you'll get an update in onRoomUpdate
         //Documentation: https://www.100ms.live/docs/flutter/v2/how--to-guides/record-and-live-stream/hls#how-to-display-hls-stream-and-get-hls-state-in-room
+        print("HLS Stream started successfully");
         break;
 
       case HMSActionResultListenerMethod.hlsStreamingStopped:
         isLive = false;
+        print("HLS Stream stopped successfully");
         break;
 
       case HMSActionResultListenerMethod.leave:
         isRoomEnded = true;
         notifyListeners();
+        print("Room left successfully");
         break;
     }
   }
