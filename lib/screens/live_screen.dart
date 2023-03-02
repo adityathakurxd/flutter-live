@@ -19,12 +19,10 @@ class _LiveScreenState extends State<LiveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final _isVideoOff = context.select<UserDataStore, bool>(
-        (user) => user.remoteVideoTrack?.isMute ?? true);
-    final _peer =
-        context.select<UserDataStore, HMSPeer?>((user) => user.remotePeer);
+    final _isVideoOff = context
+        .select<UserDataStore, bool>((user) => user.localTrack?.isMute ?? true);
     final remoteTrack = context
-        .select<UserDataStore, HMSTrack?>((user) => user.remoteVideoTrack);
+        .select<UserDataStore, HMSVideoTrack?>((user) => user.remoteVideoTrack);
     final localTrack = context
         .select<UserDataStore, HMSVideoTrack?>((user) => user.localTrack);
 
@@ -34,20 +32,18 @@ class _LiveScreenState extends State<LiveScreen> {
     return WillPopScope(
       onWillPop: () async {
         context.read<UserDataStore>().leaveRoom();
-        if (context.read<UserDataStore>().isLive == false) {
-          Navigator.pop(context);
-        }
+        Navigator.pop(context);
         return true;
       },
       child: SafeArea(
         child: Scaffold(
           body: SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
             child: isLive
                 ? Stack(
                     children: [
                       Container(
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
                           color: Colors.black.withOpacity(0.9),
                           child: _isVideoOff
                               ? const Align(
@@ -58,11 +54,47 @@ class _LiveScreenState extends State<LiveScreen> {
                                     size: 30,
                                   ),
                                 )
-                              : (remoteTrack != null)
-                                  ? HMSVideoView(
-                                      track: remoteTrack as HMSVideoTrack,
-                                      matchParent: false)
-                                  : const Center(child: Text("No Video"))),
+                              : Column(
+                                  children: [
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height /
+                                                2.5,
+                                        child: (localTrack != null &&
+                                                !localTrack.isMute)
+                                            ? HMSVideoView(
+                                                track:
+                                                    localTrack as HMSVideoTrack,
+                                                matchParent: false,
+                                                scaleType:
+                                                    ScaleType.SCALE_ASPECT_FILL,
+                                              )
+                                            : const Center(
+                                                child: Text(
+                                                "No Video",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ))),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height /
+                                                2.5,
+                                        child: (remoteTrack != null &&
+                                                !remoteTrack.isMute)
+                                            ? HMSVideoView(
+                                                track: remoteTrack,
+                                                matchParent: false,
+                                                scaleType:
+                                                    ScaleType.SCALE_ASPECT_FILL,
+                                              )
+                                            : const Center(
+                                                child: Text(
+                                                "No Video",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              )))
+                                  ],
+                                )),
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: Padding(
@@ -167,9 +199,65 @@ class _LiveScreenState extends State<LiveScreen> {
                           ),
                         ),
                       ),
+                      if (isLive)
+                        Positioned(
+                            bottom: 80,
+                            right: 5,
+                            child: Row(
+                              children: const [
+                                Icon(
+                                  Icons.circle,
+                                  color: Colors.red,
+                                  size: 10,
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  "Stream is running",
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              ],
+                            ))
                     ],
                   )
-                : Center(child: CircularProgressIndicator()),
+                : Container(
+                    color: Colors.black,
+                    child: Center(
+                        child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        const Padding(
+                          padding:  EdgeInsets.symmetric(horizontal:15.0),
+                          child:  Text(
+                            "Stream is starting currently Please wait. If it doesn't start automatically press the button below",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        OutlinedButton(
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.white),
+                              shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                              )),
+                          onPressed: () async {
+                            context.read<UserDataStore>().startHLSStreaming();
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 40),
+                            child: Text('Go Live!'),
+                          ),
+                        ),
+                      ],
+                    ))),
           ),
         ),
       ),
