@@ -21,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    SdkInitializer.hmssdk.build();
     getPermissions();
     super.initState();
   }
@@ -43,6 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _isLoading = true;
     });
+
+    //Calling build method here
+    await SdkInitializer.hmssdk.build();
+
     //The join method initialize sdk,gets auth token,creates HMSConfig and helps in joining the room
     bool isJoinSuccessful =
         await JoinService.join(SdkInitializer.hmssdk, role: role);
